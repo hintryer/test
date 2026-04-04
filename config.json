@@ -1,0 +1,32 @@
+[
+  {
+    "channel": "10.0",
+    "save_dir": "dotnet/10",
+    "last_version": "",
+    "asset_filename": ""
+  },
+  {
+    "channel": "9.0",
+    "save_dir": "dotnet/9",
+    "last_version": "",
+    "asset_filename": ""
+  },
+  {
+    "channel": "8.0",
+    "save_dir": "dotnet/8",
+    "last_version": "",
+    "asset_filename": ""
+  },
+  {
+    "channel": "7.0",
+    "save_dir": "dotnet/7",
+    "last_version": "",
+    "asset_filename": ""
+  },
+  {
+    "channel": "6.0",
+    "save_dir": "dotnet/6",
+    "last_version": "",
+    "asset_filename": ""
+  }
+]
