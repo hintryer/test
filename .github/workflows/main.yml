@@ -29,7 +29,7 @@ jobs:
 
       - name: Run script
         run: |
-          python main.py
+          python init.py
 
       - name: Get time
         run: echo "NOW=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_ENV
