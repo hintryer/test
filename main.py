@@ -122,7 +122,7 @@ def get_soft_info(config):
         return {
             "urlid": urlid,
             "name": name,
-            "filename": name + ".exe",
+            "filename": name + ".zip",
             "version": version,
             "date": date,
             "filesize": size,
@@ -148,30 +148,38 @@ def check_and_update(cfg, new_info):
     current_file_path = os.path.join(save_dir, asset_filename)
     old_file_path = os.path.join(save_dir, cfg.get("filename", ""))
 
+    MAX_SIZE_MB = 100
+    is_file_too_big = true
+
     print(f"当前版本: {old_version} → 最新版本: {last_version}")
+    if is_file_too_big:
+        print(f"⚠️ 文件过大({filesize:.2f}MB)，仅更新版本信息")
 
     # 版本相同
     if last_version == old_version:
-        if os.path.exists(current_file_path):
+        if os.path.exists(current_file_path) or is_file_too_big:
             print("✅ 已是最新版本")
-            return False, None
+            return False
         else:
             print("⚠️ 文件丢失，重新下载...")
-            ok = download_file(download_url, save_dir, asset_filename)
-            return ok, asset_filename
+            return download_file(download_url, save_dir, asset_filename)
 
     # 需要更新
-    dl_ok = download_file(download_url, save_dir, asset_filename)
-    if dl_ok:
-        if os.path.exists(old_file_path) and old_file_path != current_file_path:
-            try:
-                os.remove(old_file_path)
-                print("🗑️ 已删除旧文件")
-            except:
-                pass
-        print("✅ 更新成功")
+    dl_ok = True
+    if not is_file_too_big:
+        dl_ok = download_file(download_url, save_dir, asset_filename)
+        if dl_ok:
+            if os.path.exists(old_file_path) and old_file_path != current_file_path:
+                try:
+                    os.remove(old_file_path)
+                    print("🗑️ 已删除旧文件")
+                except:
+                    pass
+            print("✅ 更新成功")
+    else:
+        print("✅ 版本信息已更新（文件过大未下载）")
 
-    return dl_ok, asset_filename
+    return dl_ok
 
 # ==============================
 # 主程序
@@ -195,8 +203,10 @@ def main():
         try:
             new_info = get_soft_info(cfg)
             if new_info:
-                dl_ok, zip_path = check_and_update(cfg, new_info)
+                dl_ok=check_and_update(cfg, new_info)
                 cfg.update(new_info)
+                if(dl_ok)
+                    extract_exe(new_info["version"],'ddf.exe')
         except Exception as e:
             print(f"❌ 处理失败: {str(e)}")
 
