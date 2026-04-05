@@ -52,14 +52,18 @@ try:
         ver_match = re.search(r'v[\d.]+', name)
         if ver_match:
             version = ver_match.group()
-    
+    dl_tag = soup.find("dl", class_="pt_dwload bdxz")
+    if dl_tag:
+        a_tag = dl_tag.find("a")  # 只找第一个a标签
+        if a_tag:
+            first_link = a_tag.get("href", "")
     # 输出结果
     print("✅ 提取成功")
     print(f"软件名称：{name}")
     print(f"版本：{version}")
     print(f"大小：{size}")
     print(f"日期：{date}")
-    print(f"详情链接：{link}")
+    print(f"详情链接：{first_link}")
     print("===== 爬取成功 =====")
     print(soup)
 
