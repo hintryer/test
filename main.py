@@ -112,7 +112,12 @@ def get_soft_info(config):
                 first_download = a_tag.get("href", "")
 
         filename = f"{name.replace(' ', '_').replace('/', '_')}_{version}.zip"
-
+        headers = {
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                        "Referer": "https://www.downkuai.com/"
+                    }
+        res = requests.get(first_download, headers=headers, allow_redirects=False, timeout=8)
+        real_url = res.headers.get("Location")
         return {
             "urlid": urlid,
             "name": name,
@@ -120,7 +125,7 @@ def get_soft_info(config):
             "version": version,
             "date": date,
             "size": size,
-            "download_link": first_download,
+            "download_link": real_url,
             "save_dir": save_dir
         }
 
