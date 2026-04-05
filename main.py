@@ -44,7 +44,6 @@ try:
     print("版本：", version)
     print("大小：", size)
     print("日期：", date)
-    print("详情链接：", detail_link)
     print("第一个下载地址：", first_download)
     print("===== 爬取成功 =====")
     print(soup)
