@@ -40,22 +40,25 @@ def download_file(url, save_dir, filename):
 
 
 def check_and_update(cfg, new_info):
+    """版本对比 + 智能更新"""
     old_version = cfg.get("version", "")
-    last_version = new_info["version"]
-    download_url = new_info["download_link"]
-    asset_filename = new_info["filename"]
-    save_dir = new_info["save_dir"]
-    filesize = new_info["filesize"]
+    last_version = new_info.get("version", "")
+    download_url = new_info.get("download_link", "")
+    asset_filename = new_info.get("filename", "")
+    save_dir = new_info.get("save_dir", "./download")
+    filesize = new_info.get("filesize", "0 MB")
 
     current_file_path = os.path.join(save_dir, asset_filename)
     old_file_path = os.path.join(save_dir, cfg.get("filename", ""))
 
+    # 修复：字符串不能直接和数字比较
+    file_mb = parse_filesize_mb(filesize)
     MAX_SIZE_MB = 100
-    is_file_too_big = filesize > MAX_SIZE_MB
+    is_file_too_big = file_mb > MAX_SIZE_MB
 
     print(f"当前版本: {old_version} → 最新版本: {last_version}")
     if is_file_too_big:
-        print(f"⚠️ 文件过大({filesize:.2f}MB)，仅更新版本信息")
+        print(f"⚠️ 文件过大({file_mb:.2f}MB)，仅更新版本信息")
 
     # 版本相同
     if last_version == old_version:
@@ -75,7 +78,7 @@ def check_and_update(cfg, new_info):
                 try:
                     os.remove(old_file_path)
                     print("🗑️ 已删除旧文件")
-                except:
+                except Exception:
                     pass
             print("✅ 更新成功")
     else:
