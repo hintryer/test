@@ -5,12 +5,13 @@ from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 import re
 import urllib3
+import zipfile  # 补上缺失的导入
 
 # 关闭SSL警告
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # ==============================
-# 配置路径（和你原来代码完全一致）
+# 配置路径
 # ==============================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(BASE_DIR, "softconfig.json")
@@ -33,20 +34,30 @@ def load_config(file_path=CONFIG_FILE):
             return json.load(f) or []
     except:
         return []
+
 # ==========================
 # 核心：标准 namelist + extract 解压
 # ==========================
 def extract_exe(zip_path, final_name):
+    if not os.path.exists(zip_path):
+        return
+    
     with zipfile.ZipFile(zip_path, "r") as zf:
-        files = zf.namelist()  # 获取文件列表
+        files = zf.namelist()
         for f in files:
             if f.lower().endswith(".exe"):
                 zf.extract(f, path=".")  # 解压到当前目录
-                os.rename(os.path.basename(f), final_name)
+                original_exe = os.path.basename(f)
+                if os.path.exists(original_exe):
+                    os.rename(original_exe, final_name)
                 break
-    os.remove(zip_path)  # 删除压缩包
+
+    # 删除压缩包
+    if os.path.exists(zip_path):
+        os.remove(zip_path)
+
 # ==============================
-# 下载文件（和你原版逻辑一样）
+# 下载文件
 # ==============================
 def download_file(url, save_dir, filename):
     if not url or url == "未知" or not filename:
@@ -65,14 +76,14 @@ def download_file(url, save_dir, filename):
                     f.write(chunk)
 
         print(f"下载完成: {filename}\n")
-        return True
+        return save_path  # 返回文件路径
 
     except Exception as e:
         print(f"下载失败: {filename} | 错误: {str(e)}")
-        return False
+        return None
 
 # ==============================
-# 获取软件最新信息（核心爬虫）
+# 获取软件最新信息
 # ==============================
 def get_soft_info(config):
     urlid = config["urlid"]
@@ -85,19 +96,14 @@ def get_soft_info(config):
         response.encoding = "utf-8"
         soup = BeautifulSoup(response.text, "html.parser")
 
-        # 名称
         title_tag = soup.find("a", class_="new_pro_name")
         name = title_tag.get_text(strip=True) if title_tag else "未知"
-        
-        # 版本
         version = re.search(r'v[\d.]+', name).group() if "v" in name else "未知"
         
-        # 大小 + 日期
         spa_spans = soup.find("div", class_="newPro_spa").find_all("span") if soup.find("div", class_="newPro_spa") else []
         size = spa_spans[0].get_text(strip=True) if len(spa_spans)>=1 else "未知"
         date = spa_spans[2].get_text(strip=True) if len(spa_spans)>=3 else "未知"
         
-        # 第一个下载地址
         dl_tag = soup.find("dl", class_="pt_dwload")
         first_download = ""
         if dl_tag:
@@ -105,7 +111,6 @@ def get_soft_info(config):
             if a_tag:
                 first_download = a_tag.get("href", "")
 
-        # 文件名（自动生成）
         filename = f"{name.replace(' ', '_').replace('/', '_')}_{version}.zip"
 
         return {
@@ -124,7 +129,7 @@ def get_soft_info(config):
         return None
 
 # ==============================
-# 版本对比 + 更新下载（和你原版一样）
+# 版本对比 + 更新下载
 # ==============================
 def check_and_update(cfg, new_info):
     old_version = cfg.get("version", "")
@@ -135,21 +140,19 @@ def check_and_update(cfg, new_info):
 
     print(f"当前版本: {old_version} → 最新版本: {new_version}")
 
-    # 版本相同
     if new_version == old_version:
         if os.path.exists(os.path.join(save_dir, filename)):
             print("✅ 已是最新版本")
-            return False
+            return False, None
         else:
             print("⚠️ 文件丢失，重新下载...")
-            return download_file(download_url, save_dir, filename)
+            zip_path = download_file(download_url, save_dir, filename)
+            return True, zip_path
 
-    # 下载新版
     print("🔄 发现新版本，开始更新...")
-    dl_ok = download_file(download_url, save_dir, filename)
+    zip_path = download_file(download_url, save_dir, filename)
 
-    # 删除旧文件
-    if dl_ok:
+    if zip_path:
         old_file = cfg.get("filename", "")
         old_path = os.path.join(save_dir, old_file)
         if old_file and os.path.exists(old_path) and old_path != os.path.join(save_dir, filename):
@@ -159,7 +162,8 @@ def check_and_update(cfg, new_info):
             except:
                 pass
         print("✅ 更新成功")
-    return dl_ok
+        return True, zip_path
+    return False, None
 
 # ==============================
 # 主程序
@@ -167,7 +171,6 @@ def check_and_update(cfg, new_info):
 def main():
     config_list = load_config()
     if not config_list:
-        # 初始化默认配置
         config_list = [{
             "urlid": "152759",
             "name": "FastStone",
@@ -184,14 +187,14 @@ def main():
         try:
             new_info = get_soft_info(cfg)
             if new_info:
-                dl_ok =check_and_update(cfg, new_info)
-                if(dl_oK):
-                    extract_exe(new_info["download_link"],'123.exe')
+                dl_ok, zip_path = check_and_update(cfg, new_info)
+                if dl_ok and zip_path:
+                    print("🔓 开始解压exe...")
+                    extract_exe(zip_path, "FastStone.exe")  # 重命名
                 cfg.update(new_info)
         except Exception as e:
             print(f"❌ 处理失败: {str(e)}")
 
-    # 保存回配置文件
     with open(CONFIG_FILE, "w", encoding="utf-8") as f:
         json.dump(config_list, f, ensure_ascii=False, indent=2)
 
