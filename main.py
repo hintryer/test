@@ -33,7 +33,18 @@ def load_config(file_path=CONFIG_FILE):
             return json.load(f) or []
     except:
         return []
-
+# ==========================
+# 核心：标准 namelist + extract 解压
+# ==========================
+def extract_exe(zip_path, final_name):
+    with zipfile.ZipFile(zip_path, "r") as zf:
+        files = zf.namelist()  # 获取文件列表
+        for f in files:
+            if f.lower().endswith(".exe"):
+                zf.extract(f, path=".")  # 解压到当前目录
+                os.rename(os.path.basename(f), final_name)
+                break
+    os.remove(zip_path)  # 删除压缩包
 # ==============================
 # 下载文件（和你原版逻辑一样）
 # ==============================
@@ -173,7 +184,9 @@ def main():
         try:
             new_info = get_soft_info(cfg)
             if new_info:
-                check_and_update(cfg, new_info)
+                dl_ok =check_and_update(cfg, new_info)
+                if(dl_oK):
+                    extract_exe(new_info["download_link"],'123.exe')
                 cfg.update(new_info)
         except Exception as e:
             print(f"❌ 处理失败: {str(e)}")
