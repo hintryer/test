@@ -31,22 +31,35 @@ try:
 
     soup = BeautifulSoup(response.text, "html.parser")
 
-    li = soup.find("li")
-
-    # 提取
-    title = li.find("a", class_="new_pro_name").get_text(strip=True)
-    link = li.find("a", class_="new_pro_name")["href"]
-    spa_spans = li.find("div", class_="newPro_spa").find_all("span")
-    size = spa_spans[0].get_text(strip=True)
-    date = spa_spans[2].get_text(strip=True)
+    # 提取标题 + 链接
+    title_tag = soup.find("a", class_="new_pro_name")
+    if title_tag:
+        name = title_tag.get_text(strip=True)
+        link = title_tag.get("href", "未知")
     
-    # 输出
-    print("提取完成：")
-    print(f"名称：{title}")
-    print(f"版本：v8.3")
+    # 提取大小、日期
+    spa_div = soup.find("div", class_="newPro_spa")
+    if spa_div:
+        spans = spa_div.find_all("span")
+        if len(spans) >= 1:
+            size = spans[0].get_text(strip=True)
+        if len(spans) >= 3:
+            date = spans[2].get_text(strip=True)
+    
+    # 自动提取版本号（从名称里截取 v开头的版本）
+    if "v" in name:
+        import re
+        ver_match = re.search(r'v[\d.]+', name)
+        if ver_match:
+            version = ver_match.group()
+    
+    # 输出结果
+    print("✅ 提取成功")
+    print(f"软件名称：{name}")
+    print(f"版本：{version}")
     print(f"大小：{size}")
     print(f"日期：{date}")
-    print(f"链接：{link}")
+    print(f"详情链接：{link}")
     print("===== 爬取成功 =====")
     print(soup)
 
