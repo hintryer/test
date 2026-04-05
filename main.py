@@ -13,17 +13,9 @@ headers = {
     "Connection": "close",
 }
 
-# 如果你本地有代理，把下面的端口改成你自己的
-proxies = {
-    "http": "http://127.0.0.1:7890",
-    "https": "http://127.0.0.1:7890",
-}
 
 try:
-    # 方案1：如果你有代理，用这一行（取消注释）
-    # response = requests.get(target_url, headers=headers, proxies=proxies, timeout=10)
-
-    # 方案2：无代理，直接请求（国内网络可用）
+   
     response = requests.get(target_url, headers=headers, timeout=15, verify=False)
 
     response.raise_for_status()
@@ -31,46 +23,31 @@ try:
 
     soup = BeautifulSoup(response.text, "html.parser")
 
-    # 提取标题 + 链接
+    # 名称
     title_tag = soup.find("a", class_="new_pro_name")
-    if title_tag:
-        name = title_tag.get_text(strip=True)
-        link = title_tag.get("href", "未知")
+    name = title_tag.get_text(strip=True) if title_tag else "未知"
     
-    # 提取大小、日期
-    spa_div = soup.find("div", class_="newPro_spa")
-    if spa_div:
-        spans = spa_div.find_all("span")
-        if len(spans) >= 1:
-            size = spans[0].get_text(strip=True)
-        if len(spans) >= 3:
-            date = spans[2].get_text(strip=True)
+    # 版本
+    version = re.search(r'v[\d.]+', name).group() if "v" in name else "未知"
     
-    # 自动提取版本号（从名称里截取 v开头的版本）
-    if "v" in name:
-        import re
-        ver_match = re.search(r'v[\d.]+', name)
-        if ver_match:
-            version = ver_match.group()
-    dl_tag = soup.find("dl", class_="pt_dwload bdxz")
-    if dl_tag:
-        a_tag = dl_tag.find("a")  # 只找第一个a标签
-        if a_tag:
-            first_link = a_tag.get("href", "")
-    # 输出结果
-    print("✅ 提取成功")
-    print(f"软件名称：{name}")
-    print(f"版本：{version}")
-    print(f"大小：{size}")
-    print(f"日期：{date}")
-    print(f"详情链接：{first_link}")
+    # 大小 + 日期
+    spa_spans = soup.find("div", class_="newPro_spa").find_all("span") if soup.find("div", class_="newPro_spa") else []
+    size = spa_spans[0].get_text(strip=True) if len(spa_spans)>=1 else "未知"
+    date = spa_spans[2].get_text(strip=True) if len(spa_spans)>=3 else "未知"
+    
+    # 第一个下载地址
+    first_download = soup.find("dl", class_="pt_dwload").find("a").get("href", "") if soup.find("dl", class_="pt_dwload") and soup.find("dl", class_="pt_dwload").find("a") else "未知"
+    
+    # ------------ 输出 ------------
+    print("软件名称：", name)
+    print("版本：", version)
+    print("大小：", size)
+    print("日期：", date)
+    print("详情链接：", detail_link)
+    print("第一个下载地址：", first_download)
     print("===== 爬取成功 =====")
     print(soup)
 
 
 except requests.exceptions.RequestException as e:
     print(f"网络请求失败：{e}")
-    print("\n解决方法：")
-    print("1. 检查网络是否能正常打开网页")
-    print("2. 打开浏览器访问：https://www.downkuai.com/soft/152759.html")
-    print("3. 如果浏览器能打开，代码不能打开 → 开启代理")
