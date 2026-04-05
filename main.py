@@ -31,7 +31,22 @@ try:
 
     soup = BeautifulSoup(response.text, "html.parser")
 
+    li = soup.find("li")
+
+    # 提取
+    title = li.find("a", class_="new_pro_name").get_text(strip=True)
+    link = li.find("a", class_="new_pro_name")["href"]
+    spa_spans = li.find("div", class_="newPro_spa").find_all("span")
+    size = spa_spans[0].get_text(strip=True)
+    date = spa_spans[2].get_text(strip=True)
     
+    # 输出
+    print("提取完成：")
+    print(f"名称：{title}")
+    print(f"版本：v8.3")
+    print(f"大小：{size}")
+    print(f"日期：{date}")
+    print(f"链接：{link}")
     print("===== 爬取成功 =====")
     print(soup)
 
