@@ -31,18 +31,10 @@ try:
 
     soup = BeautifulSoup(response.text, "html.parser")
 
-    # 提取信息
-    version = soup.find(string=lambda s: s and "版本：" in s).replace("版本：", "").strip()
-    date = soup.find(string=lambda s: s and "日期：" in s).replace("日期：", "").strip()
-    download_btn = soup.find("a", class_="btn")
-    download_link = urljoin(target_url, download_btn.get("href"))
-    size = download_btn.text.replace("立即下载 ", "").strip()
-
+    
     print("===== 爬取成功 =====")
-    print(f"版本：{version}")
-    print(f"大小：{size}")
-    print(f"日期：{date}")
-    print(f"下载链接：{download_link}")
+    print(soup)
+
 
 except requests.exceptions.RequestException as e:
     print(f"网络请求失败：{e}")
