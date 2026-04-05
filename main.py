@@ -83,8 +83,8 @@ def get_soft_info(config):
         
         # 大小 + 日期
         spa_spans = soup.find("div", class_="newPro_spa").find_all("span") if soup.find("div", class_="newPro_spa") else []
-        size = spa_spans[0].get_text(strip=True) if len(spans)>=1 else "未知"
-        date = spa_spans[2].get_text(strip=True) if len(spans)>=3 else "未知"
+        size = spa_spans[0].get_text(strip=True) if len(spa_spans)>=1 else "未知"
+        date = spa_spans[2].get_text(strip=True) if len(spa_spans)>=3 else "未知"
         
         # 第一个下载地址
         dl_tag = soup.find("dl", class_="pt_dwload")
