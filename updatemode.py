@@ -52,53 +52,50 @@ def get_file_size_mb(file_path: str) -> float:
     return round(size_mb, 2)
 
 
-def check_and_update(old_info, new_info):
-    """版本对比 + 智能更新"""
-    old_version = old_info.get("version", "")
+def check_and_update(cfg, new_info):
+    old_version = cfg.get("version", "")
     new_version = new_info.get("version", "")
     download_url = new_info.get("download_link", "")
     filename = new_info.get("filename", "")
     save_dir = new_info.get("save_dir", "./download")
-    filesize = new_info.get("filesize", "0 MB")
-
+    
     current_file_path = os.path.join(save_dir, filename)
-    old_file_path = os.path.join(save_dir, old_info.get("filename", ""))
-
-    dl_ok = download_file(download_url, save_dir, filename)
-    file_mb = get_file_size_mb(current_file_path)
+    old_file_path = os.path.join(save_dir, cfg.get("filename", ""))
     MAX_SIZE_MB = 100
-    is_file_too_big = file_mb > MAX_SIZE_MB
 
     print(f"当前版本: {old_version} → 最新版本: {new_version}")
-    
-    if is_file_too_big:
-        print(f"⚠️ 文件过大({file_mb:.2f}MB)，仅更新版本信息")
 
-    # 版本相同
     if new_version == old_version:
-        if os.path.exists(current_file_path) or is_file_too_big:
+        if os.path.exists(current_file_path):
             print("✅ 已是最新版本")
             return False
         else:
             print("⚠️ 文件丢失，重新下载...")
             return download_file(download_url, save_dir, filename)
-
-    # 需要更新
-    dl_ok = True
-    if not is_file_too_big:
-        dl_ok = download_file(download_url, save_dir, filename)
-        if dl_ok:
-            if os.path.exists(old_file_path) and old_file_path != current_file_path:
-                try:
-                    os.remove(old_file_path)
-                    print("🗑️ 已删除旧文件")
-                except Exception:
-                    pass
-            print("✅ 更新成功")
     else:
-        print("✅ 版本信息已更新（文件过大未下载）")
+        print(f"📦 开始更新：{filename}")
 
-    return dl_ok
+        # 先下载
+        dl_ok = download_file(download_url, save_dir, filename)
+        
+        # 再获取文件大小
+        file_mb = get_file_size_mb(current_file_path)
+        is_file_too_big = file_mb > MAX_SIZE_MB
+
+        if dl_ok:
+            if not is_file_too_big:
+                # 文件不大 → 删除旧文件
+                if os.path.exists(old_file_path) and old_file_path != current_file_path:
+                    try:
+                        os.remove(old_file_path)
+                        print("🗑️ 已删除旧文件")
+                    except Exception:
+                        pass
+                print("✅ 更新成功")
+            else:
+                print(f"⚠️ 文件过大({file_mb:.2f}MB)")
+
+        return dl_ok
     
 def main():
 
