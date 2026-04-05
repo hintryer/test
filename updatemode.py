@@ -38,6 +38,19 @@ def download_file(url, save_dir, filename):
         print(f"下载失败: {filename} | 错误: {str(e)}")
         return False
 
+def get_file_size_mb(file_path: str) -> float:
+    """
+    获取文件大小，单位为MB
+    文件不存在/非文件，返回0.0
+    """
+    if not os.path.isfile(file_path):
+        return 0.0
+    # 字节转换为MB
+    size_bytes = os.path.getsize(file_path)
+    size_mb = size_bytes / (1024 ** 2)
+    # 保留两位小数
+    return round(size_mb, 2)
+
 
 def check_and_update(old_info, new_info):
     """版本对比 + 智能更新"""
@@ -51,12 +64,13 @@ def check_and_update(old_info, new_info):
     current_file_path = os.path.join(save_dir, filename)
     old_file_path = os.path.join(save_dir, old_info.get("filename", ""))
 
-    # 修复：字符串不能直接和数字比较
-    file_mb = parse_filesize_mb(filesize)
+    dl_ok = download_file(download_url, save_dir, filename)
+    file_mb = get_file_size_mb(current_file_path)
     MAX_SIZE_MB = 100
     is_file_too_big = file_mb > MAX_SIZE_MB
 
     print(f"当前版本: {old_version} → 最新版本: {new_version}")
+    
     if is_file_too_big:
         print(f"⚠️ 文件过大({file_mb:.2f}MB)，仅更新版本信息")
 
