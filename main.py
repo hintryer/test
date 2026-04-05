@@ -46,13 +46,12 @@ def extract_exe(zip_path, final_name):
         files = zf.namelist()
         for f in files:
             if f.lower().endswith(".exe"):
-                zf.extract(f, path=".")  # 解压到当前目录
+                zf.extract(f, path=".")
                 original_exe = os.path.basename(f)
                 if os.path.exists(original_exe):
                     os.rename(original_exe, final_name)
                 break
 
-    # 删除压缩包
     if os.path.exists(zip_path):
         os.remove(zip_path)
 
@@ -69,7 +68,7 @@ def download_file(url, save_dir, filename):
         save_path = os.path.join(save_dir, filename)
         
         print(f"开始下载: {filename}")
-        with requests.get(url, stream=True, timeout=60) as response:
+        with requests.get(url, stream=True, timeout=60, headers=HEADERS, verify=False) as response:
             response.raise_for_status()
             with open(save_path, "wb") as f:
                 for chunk in response.iter_content(chunk_size=8192):
@@ -104,7 +103,7 @@ def get_soft_info(config):
         size = spa_spans[0].get_text(strip=True) if len(spa_spans)>=1 else "未知"
         date = spa_spans[2].get_text(strip=True) if len(spa_spans)>=3 else "未知"
         
-        dl_tag = soup.find("dl", class_="pt_dwload")
+        dl_tag = soup.find("dl", class_="pt_dwload bdxz")
         first_download = ""
         if dl_tag:
             a_tag = dl_tag.find("a")
@@ -112,15 +111,18 @@ def get_soft_info(config):
                 first_download = a_tag.get("href", "")
 
         headers = {
-                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-                        "Referer": "https://www.downkuai.com/"
-                    }
-        res = requests.get(first_download, headers=headers, allow_redirects=False, timeout=8)
-        real_url = res.headers.get("Location")
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "Referer": "https://www.downkuai.com/"
+        }
+        real_url = ""
+        if first_download:
+            res = requests.get(first_download, headers=headers, allow_redirects=False, timeout=8, verify=False)
+            real_url = res.headers.get("Location", "")
+        
         return {
             "urlid": urlid,
             "name": name,
-            "filename": name,
+            "filename": name + ".exe",
             "version": version,
             "date": date,
             "filesize": size,
@@ -146,38 +148,30 @@ def check_and_update(cfg, new_info):
     current_file_path = os.path.join(save_dir, asset_filename)
     old_file_path = os.path.join(save_dir, cfg.get("filename", ""))
 
-    MAX_SIZE_MB = 100
-    is_file_too_big = filesize > MAX_SIZE_MB
-
     print(f"当前版本: {old_version} → 最新版本: {last_version}")
-    if is_file_too_big:
-        print(f"⚠️ 文件过大({filesize:.2f}MB)，仅更新版本信息")
 
     # 版本相同
     if last_version == old_version:
-        if os.path.exists(current_file_path) or is_file_too_big:
+        if os.path.exists(current_file_path):
             print("✅ 已是最新版本")
-            return False
+            return False, None
         else:
             print("⚠️ 文件丢失，重新下载...")
-            return download_file(download_url, save_dir, asset_filename)
+            ok = download_file(download_url, save_dir, asset_filename)
+            return ok, asset_filename
 
     # 需要更新
-    dl_ok = True
-    if not is_file_too_big:
-        dl_ok = download_file(download_url, save_dir, asset_filename)
-        if dl_ok:
-            if os.path.exists(old_file_path) and old_file_path != current_file_path:
-                try:
-                    os.remove(old_file_path)
-                    print("🗑️ 已删除旧文件")
-                except:
-                    pass
-            print("✅ 更新成功")
-    else:
-        print("✅ 版本信息已更新（文件过大未下载）")
+    dl_ok = download_file(download_url, save_dir, asset_filename)
+    if dl_ok:
+        if os.path.exists(old_file_path) and old_file_path != current_file_path:
+            try:
+                os.remove(old_file_path)
+                print("🗑️ 已删除旧文件")
+            except:
+                pass
+        print("✅ 更新成功")
 
-    return dl_ok
+    return dl_ok, asset_filename
 
 # ==============================
 # 主程序
@@ -186,7 +180,7 @@ def main():
     config_list = load_config()
     if not config_list:
         config_list = [{
-            "urlid": "152759",
+            "urlid": "70281",
             "name": "FastStone",
             "filename": "",
             "version": "",
@@ -202,9 +196,6 @@ def main():
             new_info = get_soft_info(cfg)
             if new_info:
                 dl_ok, zip_path = check_and_update(cfg, new_info)
-                if dl_ok and zip_path:
-                    print("🔓 开始解压exe...")
-                    extract_exe(zip_path, "FastStone.exe")  # 重命名
                 cfg.update(new_info)
         except Exception as e:
             print(f"❌ 处理失败: {str(e)}")
