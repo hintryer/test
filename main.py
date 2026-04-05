@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 import re
 import urllib3
-import zipfile  # 补上缺失的导入
+import zipfile
 
 # 关闭SSL警告
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -60,8 +60,8 @@ def extract_exe(zip_path, final_name):
 # 下载文件
 # ==============================
 def download_file(url, save_dir, filename):
-    if not url or url == "未知" or not filename:
-        print("下载失败：无效链接或文件名")
+    if not url or not filename:
+        print("下载失败：未获取到有效链接或文件名")
         return False
 
     try:
@@ -69,18 +69,18 @@ def download_file(url, save_dir, filename):
         save_path = os.path.join(save_dir, filename)
         
         print(f"开始下载: {filename}")
-        with requests.get(url, stream=True, timeout=60, verify=False, headers=HEADERS) as response:
+        with requests.get(url, stream=True, timeout=60) as response:
             response.raise_for_status()
             with open(save_path, "wb") as f:
                 for chunk in response.iter_content(chunk_size=8192):
                     f.write(chunk)
 
         print(f"下载完成: {filename}\n")
-        return save_path  # 返回文件路径
+        return True
 
     except Exception as e:
         print(f"下载失败: {filename} | 错误: {str(e)}")
-        return None
+        return False
 
 # ==============================
 # 获取软件最新信息
@@ -111,7 +111,6 @@ def get_soft_info(config):
             if a_tag:
                 first_download = a_tag.get("href", "")
 
-        filename = f"{name.replace(' ', '_').replace('/', '_')}_{version}.zip"
         headers = {
                         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
                         "Referer": "https://www.downkuai.com/"
@@ -138,37 +137,47 @@ def get_soft_info(config):
 # ==============================
 def check_and_update(cfg, new_info):
     old_version = cfg.get("version", "")
-    new_version = new_info["version"]
+    last_version = new_info["version"]
     download_url = new_info["download_link"]
-    filename = new_info["filename"]
+    asset_filename = new_info["filename"]
     save_dir = new_info["save_dir"]
+    filesize = new_info["filesize"]
 
-    print(f"当前版本: {old_version} → 最新版本: {new_version}")
+    current_file_path = os.path.join(save_dir, asset_filename)
+    old_file_path = os.path.join(save_dir, cfg.get("filename", ""))
 
-    if new_version == old_version:
-        if os.path.exists(os.path.join(save_dir, filename)):
+    MAX_SIZE_MB = 100
+    is_file_too_big = filesize > MAX_SIZE_MB
+
+    print(f"当前版本: {old_version} → 最新版本: {last_version}")
+    if is_file_too_big:
+        print(f"⚠️ 文件过大({filesize:.2f}MB)，仅更新版本信息")
+
+    # 版本相同
+    if last_version == old_version:
+        if os.path.exists(current_file_path) or is_file_too_big:
             print("✅ 已是最新版本")
-            return False, None
+            return False
         else:
             print("⚠️ 文件丢失，重新下载...")
-            zip_path = download_file(download_url, save_dir, filename)
-            return True, zip_path
+            return download_file(download_url, save_dir, asset_filename)
 
-    print("🔄 发现新版本，开始更新...")
-    zip_path = download_file(download_url, save_dir, filename)
+    # 需要更新
+    dl_ok = True
+    if not is_file_too_big:
+        dl_ok = download_file(download_url, save_dir, asset_filename)
+        if dl_ok:
+            if os.path.exists(old_file_path) and old_file_path != current_file_path:
+                try:
+                    os.remove(old_file_path)
+                    print("🗑️ 已删除旧文件")
+                except:
+                    pass
+            print("✅ 更新成功")
+    else:
+        print("✅ 版本信息已更新（文件过大未下载）")
 
-    if zip_path:
-        old_file = cfg.get("filename", "")
-        old_path = os.path.join(save_dir, old_file)
-        if old_file and os.path.exists(old_path) and old_path != os.path.join(save_dir, filename):
-            try:
-                os.remove(old_path)
-                print("🗑️ 已删除旧版本文件")
-            except:
-                pass
-        print("✅ 更新成功")
-        return True, zip_path
-    return False, None
+    return dl_ok
 
 # ==============================
 # 主程序
