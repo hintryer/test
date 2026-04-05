@@ -39,40 +39,40 @@ def download_file(url, save_dir, filename):
         return False
 
 
-def check_and_update(cfg, new_info):
+def check_and_update(old_info, new_info):
     """版本对比 + 智能更新"""
-    old_version = cfg.get("version", "")
-    last_version = new_info.get("version", "")
+    old_version = old_info.get("version", "")
+    new_version = new_info.get("version", "")
     download_url = new_info.get("download_link", "")
-    asset_filename = new_info.get("filename", "")
+    filename = new_info.get("filename", "")
     save_dir = new_info.get("save_dir", "./download")
     filesize = new_info.get("filesize", "0 MB")
 
-    current_file_path = os.path.join(save_dir, asset_filename)
-    old_file_path = os.path.join(save_dir, cfg.get("filename", ""))
+    current_file_path = os.path.join(save_dir, filename)
+    old_file_path = os.path.join(save_dir, old_info.get("filename", ""))
 
     # 修复：字符串不能直接和数字比较
     file_mb = parse_filesize_mb(filesize)
     MAX_SIZE_MB = 100
     is_file_too_big = file_mb > MAX_SIZE_MB
 
-    print(f"当前版本: {old_version} → 最新版本: {last_version}")
+    print(f"当前版本: {old_version} → 最新版本: {new_version}")
     if is_file_too_big:
         print(f"⚠️ 文件过大({file_mb:.2f}MB)，仅更新版本信息")
 
     # 版本相同
-    if last_version == old_version:
+    if new_version == old_version:
         if os.path.exists(current_file_path) or is_file_too_big:
             print("✅ 已是最新版本")
             return False
         else:
             print("⚠️ 文件丢失，重新下载...")
-            return download_file(download_url, save_dir, asset_filename)
+            return download_file(download_url, save_dir, filename)
 
     # 需要更新
     dl_ok = True
     if not is_file_too_big:
-        dl_ok = download_file(download_url, save_dir, asset_filename)
+        dl_ok = download_file(download_url, save_dir, filename)
         if dl_ok:
             if os.path.exists(old_file_path) and old_file_path != current_file_path:
                 try:
@@ -85,7 +85,7 @@ def check_and_update(cfg, new_info):
         print("✅ 版本信息已更新（文件过大未下载）")
 
     return dl_ok
-
+    
 def main():
 
 if __name__ == "__main__":
