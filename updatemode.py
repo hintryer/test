@@ -52,15 +52,15 @@ def get_file_size_mb(file_path: str) -> float:
     return round(size_mb, 2)
 
 
-def check_and_update(cfg, new_info):
-    old_version = cfg.get("version", "")
+def check_and_update(old_info, new_info):
+    old_version = old_info.get("version", "")
     new_version = new_info.get("version", "")
     download_url = new_info.get("download_link", "")
     filename = new_info.get("filename", "")
     save_dir = new_info.get("save_dir", "./download")
     
     current_file_path = os.path.join(save_dir, filename)
-    old_file_path = os.path.join(save_dir, cfg.get("filename", ""))
+    old_file_path = os.path.join(save_dir, old_info.get("filename", ""))
     MAX_SIZE_MB = 100
 
     print(f"当前版本: {old_version} → 最新版本: {new_version}")
