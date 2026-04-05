@@ -154,7 +154,7 @@ def check_and_update(cfg, new_info):
 
     # 版本相同
     if last_version == old_version:
-        if os.path.exists(current_file_path) or is_file_too_big:
+        if os.path.exists(current_file_path):
             print("✅ 已是最新版本")
             return False
         else:
