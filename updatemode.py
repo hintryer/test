@@ -2,14 +2,15 @@ import os
 import json
 
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-CONFIG_FILE = os.path.join(BASE_DIR, "crxconfig.json")
-
-def load_config(file_path=CONFIG_FILE):
-    if not os.path.exists(file_path):
+def load_config(file_path="config.json"):
+    """加载配置文件，安全容错"""
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    config_file_path = os.path.join(base_dir, file_path)
+    
+    if not os.path.exists(config_file_path):
         return []
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(config_file_path, "r", encoding="utf-8") as f:
             return json.load(f) or []
     except (json.JSONDecodeError, ValueError):
         return []
