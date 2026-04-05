@@ -120,7 +120,7 @@ def get_soft_info(config):
         return {
             "urlid": urlid,
             "name": name,
-            "filename": filename,
+            "filename": name,
             "version": version,
             "date": date,
             "size": size,
