@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
+import re
 
 target_url = "https://www.downkuai.com/soft/152759.html"
 
