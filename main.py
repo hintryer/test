@@ -123,7 +123,7 @@ def get_soft_info(config):
             "filename": name,
             "version": version,
             "date": date,
-            "size": size,
+            "filesize": size,
             "download_link": real_url,
             "save_dir": save_dir
         }
