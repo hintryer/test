@@ -205,7 +205,7 @@ def main():
             if new_info:
                 dl_ok=check_and_update(cfg, new_info)
                 cfg.update(new_info)
-                if(dl_ok)
+                if(dl_ok):
                     extract_exe(new_info["version"],'ddf.exe')
         except Exception as e:
             print(f"❌ 处理失败: {str(e)}")
