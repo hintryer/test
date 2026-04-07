@@ -1,20 +1,21 @@
 import os
 import json
 import requests
+import shutil
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 import re
 import urllib3
 import zipfile
 
+from updatemode import  load_config
+from updatemode import  save_config
+from updatemode import  download_file
+from updatemode import  check_and_update
+
 # 关闭SSL警告
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# ==============================
-# 配置路径
-# ==============================
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-CONFIG_FILE = os.path.join(BASE_DIR, "softconfig.json")
 
 # 浏览器伪装
 HEADERS = {
@@ -23,64 +24,63 @@ HEADERS = {
     "Accept-Language": "zh-CN,zh;q=0.9",
 }
 
-# ==============================
-# 加载配置
-# ==============================
-def load_config(file_path=CONFIG_FILE):
-    if not os.path.exists(file_path):
-        return []
-    try:
-        with open(file_path, "r", encoding="utf-8") as f:
-            return json.load(f) or []
-    except:
-        return []
 
-# ==========================
-# 核心：标准 namelist + extract 解压
-# ==========================
-def extract_exe(zip_path, final_name):
+
+def extract_exe(zip_path, pattern=".*\\.exe$", new_name=None):
     if not os.path.exists(zip_path):
-        return
-    
-    with zipfile.ZipFile(zip_path, "r") as zf:
-        files = zf.namelist()
-        for f in files:
-            if f.lower().endswith(".exe"):
-                zf.extract(f, path=".")
-                original_exe = os.path.basename(f)
-                if os.path.exists(original_exe):
-                    os.rename(original_exe, final_name)
-                break
+        print(f"❌ 压缩包不存在：{zip_path}")
+        return None
 
+    extract_dir = os.path.dirname(zip_path)
+    os.makedirs(extract_dir, exist_ok=True)
+    target_file = None
+    extracted_folder = None  # 保存解压出来的文件夹路径
+
+    try:
+        with zipfile.ZipFile(zip_path, "r") as zf:
+            regex = re.compile(pattern, re.IGNORECASE)
+            
+            for filename in zf.namelist():
+                if regex.match(filename):
+                    zf.extract(filename, extract_dir)
+                    source_path = os.path.join(extract_dir, filename)
+                    
+                    # 获取文件所在的文件夹（用于后续删除）
+                    extracted_folder = os.path.dirname(source_path)
+                    
+                    # 重命名逻辑
+                    if new_name is None:
+                        final_name = os.path.basename(filename)
+                    else:
+                        final_name = new_name
+
+                    target_file = os.path.join(extract_dir, final_name)
+
+                    if os.path.exists(target_file):
+                        os.remove(target_file)
+
+                    shutil.move(source_path, target_file)
+                    print(f"✅ 已提取：{target_file}")
+                    break
+
+        # ============================
+        # 🔥 删除解压出来的空文件夹
+        # ============================
+        if extracted_folder and os.path.exists(extracted_folder):
+            try:
+                os.rmdir(extracted_folder)  # 删除空文件夹
+            except:
+                pass
+
+    except Exception as e:
+        print(f"❌ 处理失败：{str(e)}")
+        return None
+
+    # 删除压缩包
     if os.path.exists(zip_path):
         os.remove(zip_path)
 
-# ==============================
-# 下载文件
-# ==============================
-def download_file(url, save_dir, filename):
-    if not url or not filename:
-        print("下载失败：未获取到有效链接或文件名")
-        return False
-
-    try:
-        os.makedirs(save_dir, exist_ok=True)
-        save_path = os.path.join(save_dir, filename)
-        
-        print(f"开始下载: {filename}")
-        with requests.get(url, stream=True, timeout=60, headers=HEADERS, verify=False) as response:
-            response.raise_for_status()
-            with open(save_path, "wb") as f:
-                for chunk in response.iter_content(chunk_size=8192):
-                    f.write(chunk)
-
-        print(f"下载完成: {filename}\n")
-        return True
-
-    except Exception as e:
-        print(f"下载失败: {filename} | 错误: {str(e)}")
-        return False
-
+    return final_name
 # ==============================
 # 获取软件最新信息
 # ==============================
@@ -121,7 +121,6 @@ def get_soft_info(config):
         
         return {
             "urlid": urlid,
-            "name": name,
             "filename": name + ".zip",
             "version": version,
             "date": date,
@@ -135,77 +134,28 @@ def get_soft_info(config):
         return None
 
 # ==============================
-# 版本对比 + 更新下载
-# ==============================
-def check_and_update(cfg, new_info):
-    old_version = cfg.get("version", "")
-    last_version = new_info["version"]
-    download_url = new_info["download_link"]
-    asset_filename = new_info["filename"]
-    save_dir = new_info["save_dir"]
-    filesize = new_info["filesize"]
-
-    current_file_path = os.path.join(save_dir, asset_filename)
-    old_file_path = os.path.join(save_dir, cfg.get("filename", ""))
-
-
-    print(f"当前版本: {old_version} → 最新版本: {last_version}")
-
-
-    # 版本相同
-    if last_version == old_version:
-        if os.path.exists(current_file_path):
-            print("✅ 已是最新版本")
-            return False
-        else:
-            print("⚠️ 文件丢失，重新下载...")
-            return download_file(download_url, save_dir, asset_filename)
-    # 需要更新
-    dl_ok = download_file(download_url, save_dir, asset_filename)
-    if dl_ok:
-        if os.path.exists(old_file_path) and old_file_path != current_file_path:
-            try:
-                os.remove(old_file_path)
-                print("🗑️ 已删除旧文件")
-            except:
-                pass
-        print("✅ 更新成功")
-    else:
-        print("✅ 版本信息已更新（文件过大未下载）")
-
-    return dl_ok
-
-# ==============================
 # 主程序
 # ==============================
 def main():
     config_list = load_config()
-    if not config_list:
-        config_list = [{
-            "urlid": "70281",
-            "name": "FastStone",
-            "filename": "",
-            "version": "",
-            "date": "",
-            "size": "",
-            "download_link": "",
-            "save_dir": "./download"
-        }]
 
     for cfg in config_list:
-        print(f"\n=============== 🚀 检查更新：{cfg['name']} ===============")
+        print(f"\n=============== 🚀 检查更新：{cfg['filename']} ===============")
         try:
             new_info = get_soft_info(cfg)
             if new_info:
+
                 dl_ok=check_and_update(cfg, new_info)
-                cfg.update(new_info)
-                extract_exe(new_info["version"],'ddf.exe')
+                
+                if dl_ok:
+                    new_info["filename"]==extract_exe(os.path.join(new_info["save_dir"], new_info["filename"]))
+                    cfg.update(new_info)
         except Exception as e:
             print(f"❌ 处理失败: {str(e)}")
 
-    with open(CONFIG_FILE, "w", encoding="utf-8") as f:
-        json.dump(config_list, f, ensure_ascii=False, indent=2)
+    save_config(config_list)
 
 if __name__ == "__main__":
     main()
     print("\n✅ 全部完成")
+ 
