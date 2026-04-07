@@ -67,7 +67,9 @@ def extract_exe(zip_path, pattern=".*\\.exe$", new_name=None):
 
                     # 移动文件（跨平台安全）
                     shutil.move(source_path, target_file)
+                    
                     print(f"✅ 已提取：{target_file}")
+                    return final_name
                     break
 
         # 安全删除空文件夹
