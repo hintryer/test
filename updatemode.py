@@ -1,6 +1,6 @@
 import os
 import json
-
+import requests
 
 def load_config(file_path="config.json"):
     """加载配置文件，安全容错"""
@@ -14,6 +14,11 @@ def load_config(file_path="config.json"):
             return json.load(f) or []
     except (json.JSONDecodeError, ValueError):
         return []
+
+def save_config(config_list, file_path="config.json"):
+    """保存配置到 JSON 文件"""
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(config_list, f, ensure_ascii=False, indent=2)
 
 def download_file(url, save_dir, filename):
     if not url or not filename:
@@ -56,17 +61,19 @@ def check_and_update(old_info, new_info):
     old_version = old_info.get("version", "")
     new_version = new_info.get("version", "")
     download_url = new_info.get("download_link", "")
-    filename = new_info.get("filename", "")
     save_dir = new_info.get("save_dir", "./download")
+    filename = new_info.get("filename", "")
+    old_file = old_info.get("filename", filename)  
+    old_file_path = os.path.join(save_dir, old_file)
     
     current_file_path = os.path.join(save_dir, filename)
-    old_file_path = os.path.join(save_dir, old_info.get("filename", ""))
+    
     MAX_SIZE_MB = 100
 
     print(f"当前版本: {old_version} → 最新版本: {new_version}")
-
+    print(current_file_path)
     if new_version == old_version:
-        if os.path.exists(current_file_path):
+        if os.path.exists(old_file_path):
             print("✅ 已是最新版本")
             return False
         else:
@@ -98,6 +105,6 @@ def check_and_update(old_info, new_info):
         return dl_ok
     
 def main():
-
+    print('test')
 if __name__ == "__main__":
     main()
