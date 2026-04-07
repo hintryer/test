@@ -27,14 +27,21 @@ HEADERS = {
 
 
 def extract_exe(zip_path, pattern=".*\\.exe$", new_name=None):
+    import os
+    import zipfile
+    import shutil
+    import re
+
     if not os.path.exists(zip_path):
         print(f"❌ 压缩包不存在：{zip_path}")
         return None
 
     extract_dir = os.path.dirname(zip_path)
     os.makedirs(extract_dir, exist_ok=True)
-    target_file = None
-    extracted_folder = None  # 保存解压出来的文件夹路径
+    
+    # 🔥 修复：强制初始化为 None，防止返回旧值
+    final_name = None
+    extracted_folder = None
 
     try:
         with zipfile.ZipFile(zip_path, "r") as zf:
@@ -44,11 +51,9 @@ def extract_exe(zip_path, pattern=".*\\.exe$", new_name=None):
                 if regex.match(filename):
                     zf.extract(filename, extract_dir)
                     source_path = os.path.join(extract_dir, filename)
-                    
-                    # 获取文件所在的文件夹（用于后续删除）
                     extracted_folder = os.path.dirname(source_path)
-                    
-                    # 重命名逻辑
+
+                    # 确定最终名称
                     if new_name is None:
                         final_name = os.path.basename(filename)
                     else:
@@ -56,29 +61,32 @@ def extract_exe(zip_path, pattern=".*\\.exe$", new_name=None):
 
                     target_file = os.path.join(extract_dir, final_name)
 
+                    # 覆盖已存在文件
                     if os.path.exists(target_file):
                         os.remove(target_file)
 
+                    # 移动文件（跨平台安全）
                     shutil.move(source_path, target_file)
                     print(f"✅ 已提取：{target_file}")
                     break
 
-        # ============================
-        # 🔥 删除解压出来的空文件夹
-        # ============================
-        if extracted_folder and os.path.exists(extracted_folder):
+        # 安全删除空文件夹
+        if extracted_folder and os.path.isdir(extracted_folder):
             try:
-                os.rmdir(extracted_folder)  # 删除空文件夹
+                os.rmdir(extracted_folder)
             except:
                 pass
 
     except Exception as e:
-        print(f"❌ 处理失败：{str(e)}")
-        return None
+        print(f"❌ 解压异常：{e}")
+        final_name = None  # 失败清空
 
     # 删除压缩包
-    if os.path.exists(zip_path):
-        os.remove(zip_path)
+    try:
+        if os.path.exists(zip_path):
+            os.remove(zip_path)
+    except:
+        pass
 
     return final_name
 # ==============================
