@@ -63,7 +63,7 @@ def extract_exe(zip_path, pattern=".*\\.exe$", new_name=None):
                         os.remove(target_file)
 
                     shutil.move(source_path, target_file)
-                    print(f"✅ 已提取：{target_file}")
+                    
                     break  # 👈 只 break，不 return！
 
         # 删除空文件夹
@@ -154,7 +154,7 @@ def main():
                 
                 if dl_ok:
                     new_info["filename"]=extract_exe(os.path.join(new_info["save_dir"], new_info["filename"]))
-                    print(new_info["filename"])
+                    
                 cfg.update(new_info)
         except Exception as e:
             print(f"❌ 处理失败: {str(e)}")
