@@ -167,7 +167,7 @@ def main():
     config_list = load_config()
 
     for cfg in config_list:
-        print(f"\n=============== 🚀 检查更新：{cfg['filename']} ===============")
+        print(f"\n=============== 🚀 检查更新：{cfg['urlid']} ===============")
         try:
             new_info = get_soft_info(cfg)
             if new_info:
