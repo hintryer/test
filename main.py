@@ -33,17 +33,16 @@ def extract_exe(zip_path, pattern=".*\\.exe$", new_name=None):
 
     if not os.path.exists(zip_path):
         print(f"❌ 压缩包不存在：{zip_path}")
-        return None
+        return ""
 
     extract_dir = os.path.dirname(zip_path)
     os.makedirs(extract_dir, exist_ok=True)
 
-    final_name = None
+    final_name = ""
     extracted_folder = None
 
     try:
         with zipfile.ZipFile(zip_path, 'r') as zf:
-            # 自动修复中文文件名乱码（GBK / cp437）
             file_list = []
             for name in zf.namelist():
                 try:
@@ -63,7 +62,6 @@ def extract_exe(zip_path, pattern=".*\\.exe$", new_name=None):
                     source_path = os.path.join(extract_dir, src_name)
                     extracted_folder = os.path.dirname(source_path)
 
-                    # 确定最终文件名
                     if new_name is None:
                         final_name = os.path.basename(correct_name)
                     else:
@@ -71,20 +69,17 @@ def extract_exe(zip_path, pattern=".*\\.exe$", new_name=None):
 
                     target_path = os.path.join(extract_dir, final_name)
 
-                    # 覆盖旧文件
                     if os.path.exists(target_path):
                         try:
                             os.remove(target_path)
                         except:
                             pass
 
-                    # 移动文件
                     if os.path.exists(source_path):
                         shutil.move(source_path, target_path)
                         print(f"✅ 已提取：{target_path}")
                     break
 
-        # 删除空文件夹
         if extracted_folder and os.path.isdir(extracted_folder):
             try:
                 os.rmdir(extracted_folder)
@@ -93,17 +88,16 @@ def extract_exe(zip_path, pattern=".*\\.exe$", new_name=None):
 
     except Exception as e:
         print(f"❌ 解压异常：{e}")
-        final_name = None
+        final_name = ""
 
-    # 删除压缩包
     try:
         if os.path.exists(zip_path):
             os.remove(zip_path)
     except:
         pass
 
-    # 🔥 关键修复：失败时返回空字符串，不是 None！
-    return final_name if final_name is not None else ""
+    # ✅ 永远返回字符串，绝不返回 None
+    return final_name or ""
 
 
 # ==============================
