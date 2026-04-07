@@ -71,7 +71,7 @@ def check_and_update(old_info, new_info):
     MAX_SIZE_MB = 100
 
     print(f"当前版本: {old_version} → 最新版本: {new_version}")
-    print(current_file_path)
+    print(old_file_path)
     if new_version == old_version:
         if os.path.exists(old_file_path):
             print("✅ 已是最新版本")
