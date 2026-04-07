@@ -168,6 +168,7 @@ def main():
         print(f"\n=============== 🚀 检查更新：{cfg['urlid']} ===============")
         try:
             new_info = get_soft_info(cfg)
+            print(new_info)
             if new_info:
 
                 dl_ok=check_and_update(cfg, new_info)
