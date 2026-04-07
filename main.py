@@ -153,7 +153,7 @@ def main():
                 dl_ok=check_and_update(cfg, new_info)
                 
                 if dl_ok:
-                    new_info["filename"]==extract_exe(os.path.join(new_info["save_dir"], new_info["filename"]))
+                    new_info["filename"]=extract_exe(os.path.join(new_info["save_dir"], new_info["filename"]))
                     print(new_info["filename"])
                 cfg.update(new_info)
         except Exception as e:
