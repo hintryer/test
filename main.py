@@ -39,7 +39,6 @@ def extract_exe(zip_path, pattern=".*\\.exe$", new_name=None):
     extract_dir = os.path.dirname(zip_path)
     os.makedirs(extract_dir, exist_ok=True)
     
-    # 🔥 修复：强制初始化为 None，防止返回旧值
     final_name = None
     extracted_folder = None
 
@@ -53,7 +52,6 @@ def extract_exe(zip_path, pattern=".*\\.exe$", new_name=None):
                     source_path = os.path.join(extract_dir, filename)
                     extracted_folder = os.path.dirname(source_path)
 
-                    # 确定最终名称
                     if new_name is None:
                         final_name = os.path.basename(filename)
                     else:
@@ -61,18 +59,14 @@ def extract_exe(zip_path, pattern=".*\\.exe$", new_name=None):
 
                     target_file = os.path.join(extract_dir, final_name)
 
-                    # 覆盖已存在文件
                     if os.path.exists(target_file):
                         os.remove(target_file)
 
-                    # 移动文件（跨平台安全）
                     shutil.move(source_path, target_file)
-                    
                     print(f"✅ 已提取：{target_file}")
-                    return final_name
-                    break
+                    break  # 👈 只 break，不 return！
 
-        # 安全删除空文件夹
+        # 删除空文件夹
         if extracted_folder and os.path.isdir(extracted_folder):
             try:
                 os.rmdir(extracted_folder)
@@ -81,16 +75,17 @@ def extract_exe(zip_path, pattern=".*\\.exe$", new_name=None):
 
     except Exception as e:
         print(f"❌ 解压异常：{e}")
-        final_name = None  # 失败清空
+        final_name = None
 
-    # 删除压缩包
+    # 删除压缩包（必须执行）
     try:
         if os.path.exists(zip_path):
             os.remove(zip_path)
     except:
         pass
 
-    return final_name
+    return final_name  # 👈 统一在最后 return
+    
 # ==============================
 # 获取软件最新信息
 # ==============================
