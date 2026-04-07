@@ -38,20 +38,26 @@ def extract_exe(zip_path, pattern=".*\\.exe$", new_name=None):
 
     extract_dir = os.path.dirname(zip_path)
     os.makedirs(extract_dir, exist_ok=True)
-    
+
     final_name = None
     extracted_folder = None
 
     try:
-        with zipfile.ZipFile(zip_path, "r") as zf:
+        with zipfile.ZipFile(zip_path, 'r', metadata_encoding='utf-8') as zf:  # 🔥 强制UTF-8中文支持
             regex = re.compile(pattern, re.IGNORECASE)
-            
+
             for filename in zf.namelist():
+                # 跳过文件夹
+                if filename.endswith('/') or filename.endswith('\\'):
+                    continue
+
                 if regex.match(filename):
+                    # 安全解压
                     zf.extract(filename, extract_dir)
                     source_path = os.path.join(extract_dir, filename)
                     extracted_folder = os.path.dirname(source_path)
 
+                    # 最终文件名
                     if new_name is None:
                         final_name = os.path.basename(filename)
                     else:
@@ -59,14 +65,20 @@ def extract_exe(zip_path, pattern=".*\\.exe$", new_name=None):
 
                     target_file = os.path.join(extract_dir, final_name)
 
+                    # 安全覆盖
                     if os.path.exists(target_file):
-                        os.remove(target_file)
+                        try:
+                            os.remove(target_file)
+                        except:
+                            pass
 
-                    shutil.move(source_path, target_file)
-                    
-                    break  # 👈 只 break，不 return！
+                    # 🔥 修复：判断源文件真的存在再移动
+                    if os.path.exists(source_path):
+                        shutil.move(source_path, target_file)
+                        print(f"✅ 已提取：{target_file}")
+                    break
 
-        # 删除空文件夹
+        # 清理空文件夹
         if extracted_folder and os.path.isdir(extracted_folder):
             try:
                 os.rmdir(extracted_folder)
@@ -77,15 +89,14 @@ def extract_exe(zip_path, pattern=".*\\.exe$", new_name=None):
         print(f"❌ 解压异常：{e}")
         final_name = None
 
-    # 删除压缩包（必须执行）
+    # 删除压缩包
     try:
         if os.path.exists(zip_path):
             os.remove(zip_path)
     except:
         pass
 
-    return final_name  # 👈 统一在最后 return
-    
+    return final_name
 # ==============================
 # 获取软件最新信息
 # ==============================
