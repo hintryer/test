@@ -25,7 +25,6 @@ HEADERS = {
 }
 
 
-
 def extract_exe(zip_path, pattern=".*\\.exe$", new_name=None):
     import os
     import zipfile
@@ -43,42 +42,52 @@ def extract_exe(zip_path, pattern=".*\\.exe$", new_name=None):
     extracted_folder = None
 
     try:
-        with zipfile.ZipFile(zip_path, 'r', metadata_encoding='utf-8') as zf:  # 🔥 强制UTF-8中文支持
+        # 🔥 修复：Windows 中文 ZIP 必须用 GBK 编码！！！
+        with zipfile.ZipFile(zip_path, 'r') as zf:
+            # 自动修复中文文件名乱码
+            correct_files = []
+            for name in zf.namelist():
+                try:
+                    correct_name = name.encode('cp437').decode('gbk')
+                except:
+                    correct_name = name
+                correct_files.append((name, correct_name))
+
             regex = re.compile(pattern, re.IGNORECASE)
 
-            for filename in zf.namelist():
+            for src_name, correct_name in correct_files:
                 # 跳过文件夹
-                if filename.endswith('/') or filename.endswith('\\'):
+                if src_name.endswith('/') or src_name.endswith('\\'):
                     continue
 
-                if regex.match(filename):
-                    # 安全解压
-                    zf.extract(filename, extract_dir)
-                    source_path = os.path.join(extract_dir, filename)
+                if regex.match(correct_name):
+                    # 解压
+                    zf.extract(src_name, extract_dir)
+                    source_path = os.path.join(extract_dir, src_name)
                     extracted_folder = os.path.dirname(source_path)
 
                     # 最终文件名
                     if new_name is None:
-                        final_name = os.path.basename(filename)
+                        final_name = os.path.basename(correct_name)
                     else:
                         final_name = new_name
 
                     target_file = os.path.join(extract_dir, final_name)
 
-                    # 安全覆盖
+                    # 删除已存在
                     if os.path.exists(target_file):
                         try:
                             os.remove(target_file)
                         except:
                             pass
 
-                    # 🔥 修复：判断源文件真的存在再移动
+                    # 移动
                     if os.path.exists(source_path):
                         shutil.move(source_path, target_file)
                         print(f"✅ 已提取：{target_file}")
                     break
 
-        # 清理空文件夹
+        # 删除空文件夹
         if extracted_folder and os.path.isdir(extracted_folder):
             try:
                 os.rmdir(extracted_folder)
@@ -97,6 +106,8 @@ def extract_exe(zip_path, pattern=".*\\.exe$", new_name=None):
         pass
 
     return final_name
+
+
 # ==============================
 # 获取软件最新信息
 # ==============================
