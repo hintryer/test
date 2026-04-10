@@ -1,6 +1,7 @@
 name: Test Commit & Push to Repo
 
 on:
+  push:
   workflow_dispatch:
 
 jobs:
@@ -10,8 +11,6 @@ jobs:
       contents: write   # 必须开这个权限才能推回仓库
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       # 生成一个测试文件
       - name: Create test file
