@@ -12,11 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 生成一个测试文件
-      - name: Create test file
-        run: |
-          echo "测试自动提交 $(date)" > auto-test-file.txt
-          echo "This file is auto committed by GitHub Action" >> auto-test-file.txt
+
 
       # Git 配置
       - name: Git config
@@ -24,5 +20,5 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -a -m "Update $(date +'%Y-%m-%d %H:%M:%S')"
+          git commit -a -m "Update $(date +'%Y-%m-%d %H:%M:%S')" || echo "No changes to commit"
           git push
