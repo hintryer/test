@@ -1,24 +1,28 @@
-name: Test Commit & Push to Repo
+name: 自动推送文件到仓库
 
 on:
   push:
   workflow_dispatch:
 
 jobs:
-  test-upload-to-repo:
+  push-files:
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # 必须开这个权限才能推回仓库
+      contents: write
     steps:
-      - uses: actions/checkout@v4
+      - name: 拉取代码
+        uses: actions/checkout@v5
 
+      # 示例：创建一个测试文件
+      - name: 生成/修改文件
+        run: |
+          echo "自动生成的文件" > auto-generated-file.txt
+          date > last-update.txt
 
-
-      # Git 配置
-      - name: Git config
+      - name: Git Push
         run: |
           git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.email "github-actions[bot]@users.com"
           git add .
           git commit -a -m "Update $(date +'%Y-%m-%d %H:%M:%S')" || echo "No changes to commit"
           git push
