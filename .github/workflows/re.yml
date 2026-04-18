@@ -5,13 +5,15 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag name (e.g. v1.0.0)'
+        description: "输入发布标签，例如 v1.0.0"
         required: true
-        default: 'v1.0.0'
+        default: "v1.0.0"
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # 👈 关键：给令牌开发布权限
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -22,10 +24,12 @@ jobs:
       - name: Test
         run: cat Release.txt
 
-      - name: Release
+      - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
+          tag_name: ${{ github.event.inputs.tag }}
+          name: Release ${{ github.event.inputs.tag }}
+          body: 手动触发构建发布
           files: Release.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
