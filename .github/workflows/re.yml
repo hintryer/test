@@ -14,5 +14,6 @@ jobs:
         run: cat Release.txt
       - name: Release
         uses: softprops/action-gh-release@v3
+        if: github.ref_type == 'tag'
         with:
           files: Release.txt
