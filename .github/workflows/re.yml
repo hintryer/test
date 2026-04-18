@@ -2,7 +2,12 @@ name: Main
 
 on:
   push:
-  workflow_dispatch:  # 允许手动运行
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag name (e.g. v1.0.0)'
+        required: true
+        default: 'v1.0.0'
 
 jobs:
   build:
@@ -19,8 +24,8 @@ jobs:
 
       - name: Release
         uses: softprops/action-gh-release@v2
-        if: github.ref_type == 'tag'
         with:
+          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
           files: Release.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
