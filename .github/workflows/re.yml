@@ -8,12 +8,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
       - name: Build
         run: echo ${{ github.sha }} > Release.txt
+
       - name: Test
         run: cat Release.txt
+
       - name: Release
-        uses: softprops/action-gh-release@v3
-        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'  # 只有打 tag 才会执行发布
         with:
-          files: last-update.txt
+          files: Release.txt  # 这里必须和上面生成的文件名一致
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 必须加这个
