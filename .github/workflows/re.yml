@@ -27,6 +27,6 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.inputs.tag }}
+          tag_name: $(date +%Y%m%d-%H%M%S)
           body: 手动触发构建发布
           files: Release.txt
