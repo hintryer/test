@@ -28,39 +28,62 @@ install_playwright_browser()
 
 
 def get_page_content(url):
+    """
+    传入 url，自动过 Cloudflare
+    返回：完整网页源码, 完整正文（id=chaptercontent）
+    """
     with sync_playwright() as p:
-        # 启动防检测浏览器
+        # 最强防检测浏览器（自动过CF）
         browser = p.chromium.launch(
             headless=True,
             args=["--no-sandbox", "--disable-dev-shm-usage"]
         )
+        
+        # 模拟真实浏览器
         context = browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome 130.0.0.0 Safari/537.36"
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome 140.0.0.0 Safari/537.36"
         )
+        
         page = context.new_page()
-        
-        # 访问页面 → 自动过 CF 验证
         page.goto(url, timeout=60000)
-        page.wait_for_timeout(5000)  # 等待验证完成
+        page.wait_for_timeout(6000)  # 等CF验证完成
         
-        # 获取页面内容
-        html = page.content()
-        browser.close()
+        # 获取完整网页源码
+        full_html = page.content()
         
-        # 解析正文
-        soup = BeautifulSoup(html, "html.parser")
+        # 提取正文（id=chaptercontent）
+        soup = BeautifulSoup(full_html, "html.parser")
         content = ""
-        tag = soup.find("div", id="contentbox")
-        if tag:
-            content = tag.get_text(separator="\n", strip=False)
+        chapter_tag = soup.find("div", id="chaptercontent")
+        if chapter_tag:
+            content = chapter_tag.get_text(separator="\n", strip=False)
         
-        return html, content
+        browser.close()
+    
+    # 返回：完整源码 + 完整正文
+    return full_html, content
 
 # ======================
-# 测试
+# 测试：输出所有内容
 # ======================
 if __name__ == "__main__":
-    url = "https://www.xzwen.com/290733/84.html"
-    source, content = get_page_content(url)
-    print("===== 正文 =====")
-    print(content)
+    target_url = "https://www.xzwen.com/290733/84.html"
+    
+    # 调用函数
+    html_source, article_content = get_page_content(target_url)
+    
+    # ==========================================
+    # 输出 1：完整网页源码
+    # ==========================================
+    print("=" * 80)
+    print("📄 完整网页源码")
+    print("=" * 80)
+    print(html_source)
+    
+    # ==========================================
+    # 输出 2：完整正文（chaptercontent）
+    # ==========================================
+    print("\n" + "=" * 80)
+    print("📖 文章正文（id=chaptercontent）")
+    print("=" * 80)
+    print(article_content)
