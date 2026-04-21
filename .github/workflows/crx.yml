@@ -1,0 +1,39 @@
+name: LastPass CRX Auto Release
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Create crx folder
+        run: mkdir -p crx
+
+      # 1. 查最新版本（官方 API）
+      - name: Fetch version
+        id: version
+        run: |
+          ID="hdokiejnpimakedhajhdlcegeplioahd"
+          XML=$(curl -s "https://clients2.google.com/service/update2/crx?prodversion=120.0.0.0&x=id%3D${ID}%26uc")
+          VER=$(echo "$XML" | grep -oP 'version="\K[0-9.]+' | head -1)
+          echo "ver=$VER" >> $GITHUB_OUTPUT
+
+      # 2. 下载 CRX（官方 API + 合法文件名）
+      - name: Download CRX
+        run: |
+          ID="hdokiejnpimakedhajhdlcegeplioahd"
+          URL="https://clients2.google.com/service/update2/crx?response=redirect&prodversion=120.0.0.0&acceptformat=crx2,crx3&x=id%3D${ID}%26uc"
+          wget -O "crx/LastPass-Free-Password-Manager_${{ steps.version.outputs.ver }}.crx" "$URL"
+
+      # 3. 上传 Release
+      - name: Create Release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: v${{ steps.version.outputs.ver }}
+          files: crx/*.crx
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
