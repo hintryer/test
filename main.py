@@ -4,6 +4,3 @@ from packaging import version
 latest_mautic_version = lastversion.latest("mautic/mautic", output_format='dict')
 
 print(f'Latest Mautic version: {latest_mautic_version}')
-
-if latest_mautic_version >= version.parse('1.8.1'):
-    print('It is newer')
