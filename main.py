@@ -8,13 +8,12 @@ def get_ext_version_and_size(ext_id):
         resp = requests.get(url, timeout=10)
         xml = resp.text
 
-        ver_match = re.search(r'version="(\d+)"/>', xml)
+        ver_match = re.search(r'version="([\d.]+)"/>', xml)
         size_match = re.search(r'size="(\d+)"', xml)
 
         version = ver_match.group(1) if ver_match else None
         size = size_match.group(1) if size_match else None
 
-        return version, size
         return version, size
 
     except Exception as e:
