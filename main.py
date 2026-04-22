@@ -7,17 +7,14 @@ def get_ext_version_and_size(ext_id):
     try:
         resp = requests.get(url, timeout=10)
         xml = resp.text
-        print("版本号:", xml)
-        # 👇 匹配：version="4.152.3"/>
+
         ver_match = re.search(r'version="(\d+)"/>', xml)
-        print("版本号:", ver_match)
-        version = ver_match.group(1)
-
-        # 👇 匹配 size
         size_match = re.search(r'size="(\d+)"', xml)
-        print("版本号:", size_match)
-        size = size_match.group(1)
 
+        version = ver_match.group(1) if ver_match else None
+        size = size_match.group(1) if size_match else None
+
+        return version, size
         return version, size
 
     except Exception as e:
