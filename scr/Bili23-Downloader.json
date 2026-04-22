@@ -1,0 +1,25 @@
+{
+    "name": "Bili23_Downloader-1.70.4-windows-x64.zip",
+    "savedir": "soft/其他工具",
+    "version": "1.70.4",
+    "description": "Bilibili video download tool.",
+    "homepage": "https://github.com/ScottSloan/Bili23-Downloader",
+    "license": "MIT",
+    "url": "https://github.com/ScottSloan/Bili23-Downloader/releases/download/v1.70.4/Bili23_Downloader-1.70.4-windows-x64.zip",
+    "hash": "auto",
+    "extract_dir": "Bili23_Downloader-1.70.4-windows-x64",
+    "bin": "Bili23_Downloader.exe",
+    "shortcuts": [
+        [
+            "Bili23_Downloader.exe",
+            "Bili23 Downloader"
+        ]
+    ],
+    "checkver": {
+        "github": "ScottSloan/Bili23-Downloader"
+    },
+    "autoupdate": {
+        "url": "https://github.com/ScottSloan/Bili23-Downloader/releases/download/v$version/Bili23_Downloader-$version-windows-x64.zip",
+        "name": "Bili23_Downloader-$version-windows-x64.zip"
+    }
+}

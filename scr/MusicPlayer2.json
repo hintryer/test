@@ -1,0 +1,25 @@
+{
+    "name": "MusicPlayer2_V2.78_x64.zip",
+    "savedir": "soft/影音工具",
+    "version": "2.78",
+    "description": "A simple music player.",
+    "homepage": "https://github.com/zhongyang219/MusicPlayer2",
+    "license": "MIT",
+    "url": "https://github.com/zhongyang219/MusicPlayer2/releases/download/V2.78/MusicPlayer2_V2.78_x64.zip",
+    "hash": "auto",
+    "extract_dir": "MusicPlayer2",
+    "bin": "MusicPlayer2.exe",
+    "shortcuts": [
+        [
+            "MusicPlayer2.exe",
+            "MusicPlayer2"
+        ]
+    ],
+    "checkver": {
+        "github": "zhongyang219/MusicPlayer2"
+    },
+    "autoupdate": {
+        "url": "https://github.com/zhongyang219/MusicPlayer2/releases/download/V$version/MusicPlayer2_V$version_x64.zip",
+        "name": "MusicPlayer2_V$version_x64.zip"
+    }
+}

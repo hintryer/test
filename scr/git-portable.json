@@ -1,0 +1,22 @@
+{
+    "name": "PortableGit-2.54.0-64-bit.7z.exe",
+    "savedir": "soft/编程工具",
+    "version": "2.54.0.windows.1",
+    "description": "Git for Windows.",
+    "homepage": "https://gitforwindows.org/",
+    "license": "GPL-2.0",
+    "url": "https://github.com/git-for-windows/git/releases/download/v2.54.0.windows.1/PortableGit-2.54.0-64-bit.7z.exe",
+    "hash": "auto",
+    "extract_dir": "PortableGit",
+    "bin": [
+        "bin/git.exe",
+        "cmd/git.exe"
+    ],
+    "checkver": {
+        "github": "git-for-windows/git"
+    },
+    "autoupdate": {
+        "url": "https://github.com/git-for-windows/git/releases/download/v$version/PortableGit-$version-64-bit.7z.exe",
+        "name": "PortableGit-$version-64-bit.7z.exe"
+    }
+}

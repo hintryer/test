@@ -1,0 +1,24 @@
+{
+    "name": "MouseClickTool.exe",
+    "savedir": "soft/单文件",
+    "version": "3.1.0.0",
+    "description": "Free mouse auto clicker and auto typer.",
+    "homepage": "https://github.com/lalakii/MouseClickTool",
+    "license": "MIT",
+    "url": "https://github.com/lalakii/MouseClickTool/releases/download/3.1.0.0/MouseClickTool.exe",
+    "hash": "auto",
+    "bin": "MouseClickTool.exe",
+    "shortcuts": [
+        [
+            "MouseClickTool.exe",
+            "MouseClickTool"
+        ]
+    ],
+    "checkver": {
+        "github": "lalakii/MouseClickTool"
+    },
+    "autoupdate": {
+        "url": "https://github.com/lalakii/MouseClickTool/releases/download/$version/MouseClickTool.exe",
+        "name": "MouseClickTool.exe"
+    }
+}

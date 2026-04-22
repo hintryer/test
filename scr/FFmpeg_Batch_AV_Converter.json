@@ -1,0 +1,25 @@
+{
+    "name": "FFmpeg_Batch_AV_Converter_Portable_3.2.8_x64.zip",
+    "savedir": "soft/影音工具",
+    "version": "3.2.8",
+    "description": "FFmpeg Batch AV Converter.",
+    "homepage": "https://github.com/eibols/ffmpeg_batch",
+    "license": "MIT",
+    "url": "https://github.com/eibols/ffmpeg_batch/releases/download/3.2.8/FFmpeg_Batch_AV_Converter_Portable_3.2.8_x64.zip",
+    "hash": "auto",
+    "extract_dir": "FFmpeg_Batch_AV_Converter_Portable_3.2.8_x64",
+    "bin": "FFmpeg_Batch_AV_Converter.exe",
+    "shortcuts": [
+        [
+            "FFmpeg_Batch_AV_Converter.exe",
+            "FFmpeg Batch AV Converter"
+        ]
+    ],
+    "checkver": {
+        "github": "eibols/ffmpeg_batch"
+    },
+    "autoupdate": {
+        "url": "https://github.com/eibols/ffmpeg_batch/releases/download/$version/FFmpeg_Batch_AV_Converter_Portable_$version_x64.zip",
+        "name": "FFmpeg_Batch_AV_Converter_Portable_$version_x64.zip"
+    }
+}

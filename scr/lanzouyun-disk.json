@@ -1,0 +1,25 @@
+{
+    "name": "lanzouyun-3.5.3-x64-win.zip",
+    "savedir": "soft/下载传输",
+    "version": "3.5.3",
+    "description": "Lanzouyun cloud disk unofficial client.",
+    "homepage": "https://github.com/chenhb23/lanzouyun-disk",
+    "license": "MIT",
+    "url": "https://github.com/chenhb23/lanzouyun-disk/releases/download/v3.5.3/lanzouyun-3.5.3-x64-win.zip",
+    "hash": "auto",
+    "extract_dir": "lanzouyun-3.5.3-x64-win",
+    "bin": "lanzouyun.exe",
+    "shortcuts": [
+        [
+            "lanzouyun.exe",
+            "蓝奏云盘"
+        ]
+    ],
+    "checkver": {
+        "github": "chenhb23/lanzouyun-disk"
+    },
+    "autoupdate": {
+        "url": "https://github.com/chenhb23/lanzouyun-disk/releases/download/v$version/lanzouyun-$version-x64-win.zip",
+        "name": "lanzouyun-$version-x64-win.zip"
+    }
+}

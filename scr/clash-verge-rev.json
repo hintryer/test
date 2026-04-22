@@ -1,0 +1,24 @@
+{
+    "name": "Clash.Verge_2.4.7_x64-setup.exe",
+    "savedir": "soft/其他工具",
+    "version": "2.4.7",
+    "description": "Clash Verge Rev - Clash GUI client.",
+    "homepage": "https://github.com/clash-verge-rev/clash-verge-rev",
+    "license": "GPL-3.0",
+    "url": "https://github.com/clash-verge-rev/clash-verge-rev/releases/download/v2.4.7/Clash.Verge_2.4.7_x64-setup.exe",
+    "hash": "auto",
+    "bin": "Clash.Verge_2.4.7_x64-setup.exe",
+    "shortcuts": [
+        [
+            "Clash.Verge_2.4.7_x64-setup.exe",
+            "Clash Verge Rev"
+        ]
+    ],
+    "checkver": {
+        "github": "clash-verge-rev/clash-verge-rev"
+    },
+    "autoupdate": {
+        "url": "https://github.com/clash-verge-rev/clash-verge-rev/releases/download/v$version/Clash.Verge_$version_x64-setup.exe",
+        "name": "Clash.Verge_$version_x64-setup.exe"
+    }
+}

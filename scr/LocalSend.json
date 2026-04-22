@@ -1,0 +1,25 @@
+{
+    "name": "LocalSend-1.17.0-windows-x86-64.zip",
+    "savedir": "soft/下载传输",
+    "version": "1.17.0",
+    "description": "Open source cross-platform file sharing tool.",
+    "homepage": "https://localsend.org/",
+    "license": "MIT",
+    "url": "https://github.com/localsend/localsend/releases/download/v1.17.0/LocalSend-1.17.0-windows-x86-64.zip",
+    "hash": "auto",
+    "extract_dir": "LocalSend-1.17.0-windows-x86-64",
+    "bin": "LocalSend.exe",
+    "shortcuts": [
+        [
+            "LocalSend.exe",
+            "LocalSend"
+        ]
+    ],
+    "checkver": {
+        "github": "localsend/localsend"
+    },
+    "autoupdate": {
+        "url": "https://github.com/localsend/localsend/releases/download/v$version/LocalSend-$version-windows-x86-64.zip",
+        "name": "LocalSend-$version-windows-x86-64.zip"
+    }
+}

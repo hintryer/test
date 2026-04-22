@@ -1,0 +1,26 @@
+{
+    "name": "Notepad4_HD_zh-Hans_x64_v26.03r6058.zip",
+    "savedir": "soft/文本办公",
+    "version": "26.03r6058",
+    "description": "Notepad4 - a fast text editor.",
+    "homepage": "https://github.com/zufuliu/notepad4",
+    "license": "MIT",
+    "url": "https://github.com/zufuliu/notepad4/releases/download/v26.03r6058/Notepad4_HD_zh-Hans_x64_v26.03r6058.zip",
+    "hash": "auto",
+    "extract_dir": "Notepad4",
+    "bin": "Notepad4.exe",
+    "shortcuts": [
+        [
+            "Notepad4.exe",
+            "Notepad4"
+        ]
+    ],
+    "checkver": {
+        "github": "zufuliu/notepad4",
+        "regex": "v([\\w.]+)"
+    },
+    "autoupdate": {
+        "url": "https://github.com/zufuliu/notepad4/releases/download/v$version/Notepad4_HD_zh-Hans_x64_v$version.zip",
+        "name": "Notepad4_HD_zh-Hans_x64_v$version.zip"
+    }
+}

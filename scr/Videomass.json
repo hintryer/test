@@ -1,0 +1,25 @@
+{
+    "name": "Videomass-6.1.20-win64-portable.7z",
+    "savedir": "soft/影音工具",
+    "version": "6.1.20",
+    "description": "GUI for FFmpeg.",
+    "homepage": "https://github.com/jeanslack/Videomass",
+    "license": "MIT",
+    "url": "https://github.com/jeanslack/Videomass/releases/download/v6.1.20/Videomass-6.1.20-win64-portable.7z",
+    "hash": "auto",
+    "extract_dir": "Videomass-6.1.20-win64-portable",
+    "bin": "Videomass.exe",
+    "shortcuts": [
+        [
+            "Videomass.exe",
+            "Videomass"
+        ]
+    ],
+    "checkver": {
+        "github": "jeanslack/Videomass"
+    },
+    "autoupdate": {
+        "url": "https://github.com/jeanslack/Videomass/releases/download/v$version/Videomass-$version-win64-portable.7z",
+        "name": "Videomass-$version-win64-portable.7z"
+    }
+}

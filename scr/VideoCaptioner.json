@@ -1,0 +1,17 @@
+{
+    "name": "",
+    "savedir": "soft/影音工具",
+    "version": null,
+    "description": "Video caption recognition tool.",
+    "homepage": "https://github.com/WEIFENG2333/VideoCaptioner",
+    "license": "MIT",
+    "url": null,
+    "hash": null,
+    "extract_dir": null,
+    "bin": null,
+    "shortcuts": [],
+    "checkver": {
+        "github": "WEIFENG2333/VideoCaptioner"
+    },
+    "autoupdate": {}
+}
