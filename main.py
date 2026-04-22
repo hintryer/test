@@ -7,7 +7,7 @@ def get_ext_version_and_size(ext_id):
     try:
         resp = requests.get(url, timeout=10)
         xml = resp.text
-
+        print("版本号:", xml)
         # 👇 匹配：version="4.152.3"/>
         ver_match = re.search(r'version="(\d+)"/>', xml)
         version = ver_match.group(1)
