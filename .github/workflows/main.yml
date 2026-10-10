@@ -2,13 +2,10 @@ name: ScheduleTest
 on:
   workflow_dispatch:
   schedule:
-    - cron: '*/5 * * * *'
-
+    - cron: '7,22,37,52 * * * *'
 jobs:
   test:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Print trigger
-        run: |
-          echo "EVENT_NAME=${{ github.event_name }}"
-          echo "UTC_TIME=$(date -u)"
+        run: echo "This step will always run"
