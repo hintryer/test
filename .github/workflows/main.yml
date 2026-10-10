@@ -1,42 +1,14 @@
-name: Auto Tag & Release
+name: ScheduleTest
 on:
-  push:
-    branches: [main] # 推送到main分支自动触发
-  workflow_dispatch: # 支持手动点按钮触发
-
-permissions:
-  contents: write # 部分新版repo可以靠这个，很多场景仍然需要PAT
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
+  test:
+    runs-on: ubuntu-24.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0 # 拉取全部历史，方便读取旧tag
-
-      - name: 生成/修改文件
+      - name: Print trigger
         run: |
-          echo "自动生成的文件" > auto-generated-file.txt
-          date > last-update.txt
-
-      # 👉 生成tag版本号，这里示例：v+日期 v2026.09.12
-      - name: Generate tag name
-        id: gen_tag
-        run: |
-          TAG="v$(date +%Y.%m.%d)"
-          echo "tag_name=$TAG" >> $GITHUB_OUTPUT
-
-      # 👉 action-gh-release 自动创建tag并发布release
-      - name: Create Release
-        uses: softprops/action-gh-release@v3
-        with:
-          tag_name: ${{ steps.gen_tag.outputs.tag_name }}
-          target_commitish: ${{ github.sha }}
-          generate_release_notes: true # 自动生成Release变更日志
-          # files: | # 制品上传，按需打开
-          #   dist/*.zip
-        env:
-          # 强烈建议使用PAT，避免403
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          echo "EVENT_NAME=${{ github.event_name }}"
+          echo "UTC_TIME=$(date -u)"
